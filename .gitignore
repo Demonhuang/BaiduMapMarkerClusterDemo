@@ -1,0 +1,15 @@
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/.name
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/runConfigurations.xml
+/.idea/gradle.xml
+/.idea/compiler.xml
+/.idea/vcs.xml
+/.idea/copyright/profiles_settings.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
