@@ -13,6 +13,7 @@ import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
@@ -84,6 +85,18 @@ public class MainActivity extends Activity {
     }
 
     private void setListener() {
+
+        //点击标注点放大
+        mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if (mBaiduMap.getMapStatus().zoom < mBaiduMap.getMaxZoomLevel()) {
+                    float newZoom = mBaiduMap.getMapStatus().zoom + 2.0f;
+                    mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(newZoom));
+                }
+                return false;
+            }
+        });
 
         //地图加载结束时显示标注点
         mBaiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
