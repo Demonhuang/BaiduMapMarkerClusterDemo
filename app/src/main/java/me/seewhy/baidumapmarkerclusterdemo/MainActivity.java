@@ -21,6 +21,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
+    private String TAG = "MainActivity";
+
     private MapView mMapView;
     private Boolean isAverageCenter = false;
     private Integer mMaxZoom = 12;
@@ -32,7 +34,6 @@ public class MainActivity extends Activity {
     public LocationClient mLocationClient = null;
     public BDLocationListener myLocationListener = null;
 
-    private String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +52,9 @@ public class MainActivity extends Activity {
     private void init() {
         mMapView = (MapView) findViewById(R.id.bmapView);
         mBaiduMap = mMapView.getMap();
-
         mBaiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(5.0f));
-
         mCluster = new Cluster(this, mMapView, isAverageCenter, mGridSize, mDistance);
-
         mBaiduMap.clear();
-
     }
 
     /**
@@ -92,14 +89,7 @@ public class MainActivity extends Activity {
         mBaiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                if (mBaiduMap.getMapStatus().zoom >= MainActivity.this.mMaxZoom) {
-                    mBaiduMap.clear();
-                    pinMarkers(refreshVersionClusterMarker(mMarkers));
-                } else {
-                    ArrayList<MarkerOptions> clusters = mCluster.createCluster(refreshVersionClusterMarker(mMarkers));
-                    mBaiduMap.clear();
-                    pinMarkers(clusters);
-                }
+                refreshMarks();
             }
         });
 
@@ -117,17 +107,24 @@ public class MainActivity extends Activity {
 
             @Override
             public void onMapStatusChangeFinish(MapStatus mapStatus) {
-                if (mBaiduMap.getMapStatus().zoom >= MainActivity.this.mMaxZoom) {
-                    mBaiduMap.clear();
-                    pinMarkers(refreshVersionClusterMarker(mMarkers));
-                } else {
-                    ArrayList<MarkerOptions> clusters = mCluster.createCluster(refreshVersionClusterMarker(mMarkers));
-                    mBaiduMap.clear();
-                    pinMarkers(clusters);
-                }
+                refreshMarks();
             }
         });
 
+    }
+
+    /**
+     * 如果当前地图缩放程度超过设置的最大值，则不改变点坐标，否则重新进行聚合运算
+     */
+    private void refreshMarks() {
+        if (mBaiduMap.getMapStatus().zoom >= MainActivity.this.mMaxZoom) {
+            mBaiduMap.clear();
+            pinMarkers(refreshVersionClusterMarker(mMarkers));
+        } else {
+            ArrayList<MarkerOptions> clusters = mCluster.createCluster(refreshVersionClusterMarker(mMarkers));
+            mBaiduMap.clear();
+            pinMarkers(clusters);
+        }
     }
 
     private void LocationOrientate() {
@@ -140,21 +137,22 @@ public class MainActivity extends Activity {
         option.setProdName("定位GPS");
         option.setOpenGps(true);
         option.setCoorType("bd09ll");
-
         mLocationClient.setLocOption(option);
         mLocationClient.start();
 
         mMapView.refreshDrawableState();
-
     }
 
+
+    /**
+     * 初始时定位到当前位置
+     */
     public class MyLocationListener implements BDLocationListener {
         @Override
         public void onReceiveLocation(BDLocation location) {
             LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
             mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(currentPosition));
         }
-
     }
 
     private ArrayList<MarkerOptions> refreshVersionClusterMarker(ArrayList<MarkerOptions> list) {
